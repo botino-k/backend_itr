@@ -1,7 +1,7 @@
-import jwt from 'jsonwebtoken';
-import bcrypt from 'bcrypt';
+import jwt from "jsonwebtoken";
+import bcrypt from "bcrypt";
 
-import userModel from '../models/user.js';
+import userModel from "../models/user.js";
 
 export const signUp = async (req, res) => {
   try {
@@ -21,22 +21,66 @@ export const signUp = async (req, res) => {
     //   {
     //     _id: user._id,
     //   },
-    //   'whaaat',
+    //   "whaaat",
     //   {
-    //     expiresIn: '1d',
-    //   },
+    //     expiresIn: "1d",
+    //   }
     // );
 
-    const {  password: hash, ...userData } = user._doc;
+    const { password: hash, ...userData } = user._doc;
 
     res.json({
       ...userData,
-      //token,
+      // token,
     });
   } catch (error) {
     console.log(error);
     res.status(500).json({
-      message: 'Error. User is already exist',
+      message: "Error. User is already exist",
+    });
+  }
+};
+
+export const login = async (req, res) => {
+  try {
+    const user = await userModel.findOne({ email: req.body.email });
+
+    if (!user) {
+      return res.status(404).json({
+        message: "User not found",
+      });
+    }
+
+    const isValidPass = await bcrypt.compare(
+      req.body.password,
+      user._doc.password
+    );
+
+    if (!isValidPass) {
+      return res.status(400).json({
+        message: "Wrong password or email",
+      });
+    }
+
+    const token = jwt.sign(
+      {
+        _id: user._id,
+      },
+      "waaaat",
+      {
+        expiresIn: "1d",
+      }
+    );
+
+    const { password: hash, ...userData } = user._doc;
+    res.json({
+      ...userData,
+      token,
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({
+      message: "Error. Login failed",
     });
   }
 };

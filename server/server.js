@@ -4,7 +4,7 @@ import mongoose from 'mongoose';
 
 import { body } from 'express-validator';
 
-import { signUpValidation } from './validation/userValidation.js';
+import { signUpValidation, loginValidation } from './validation/userValidation.js';
 import { handleValidationErrors } from './utils/index.js';
 import { userController } from './controllers/index.js';
 
@@ -18,7 +18,9 @@ app.get( '/', ( req, res)=>{
 })
 
 app.post('/auth/signup', signUpValidation, handleValidationErrors, userController.signUp);
+app.post('/auth/login', loginValidation, handleValidationErrors, userController.login);
 
+mongoose.set("strictQuery", false);
 mongoose
   .connect(process.env.ATLAS_URI || 'mongodb+srv://task4:0Mgf3juajxvxd6y9@botinok.chnhn2a.mongodb.net/blog?retryWrites=true&w=majority')
   .then(() => console.log('DataBase connection'))
